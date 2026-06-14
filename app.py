@@ -51,42 +51,37 @@ with col_left:
         btn_reset = st.button("🗑️ XÓA BỘ LỌC", use_container_width=True)
 
 # =====================================================================
-# CỘT PHẢI: XỬ LÝ LOGIC VÀ HIỂN THỊ KẾT QUẢ KPI
+# CỘT PHẢI: XỬ LÝ LOGIC VÀ HIỂN THỊ KẾT QUẢ KPI (ĐÃ TỐI ƯU CHỮ TO, ĐẬM)
 # =====================================================================
 with col_right:
     st.markdown("### 📌 Chỉ số kết quả đầu ra")
     
-    # Tạo sẵn các ô chứa kết quả (Giao diện lưới 2x2)
+    # Tạo sẵn các ô chứa kết quả dưới dạng lưới 2x2 bằng cấu trúc cột thông minh
     row1_col1, row1_col2 = st.columns(2)
     row2_col1, row2_col2 = st.columns(2)
     
     # Trường hợp 1: Người dùng nhấn nút XÓA BỘ LỌC hoặc chưa thực hiện hành động nào
     if btn_reset or (not btn_run):
-        txt_volume = f"{ICON_WAIT} Đang chờ..."
-        txt_revenue = f"{ICON_WAIT} Đang chờ..."
-        txt_fee = f"{ICON_WAIT} Đang chờ..."
-        txt_score = f"{ICON_WAIT} Đang chờ..."
+        # Điền trạng thái chờ vào các khối hiển thị Metric (Chữ to, rõ ràng)
+        with row1_col1: st.metric(label="Tổng lượng giao dịch mô phỏng", value="🔄 Đang chờ...")
+        with row1_col2: st.metric(label="Doanh thu kênh (Channel Revenue)", value="🔄 Đang chờ...")
+        with row2_col1: st.metric(label="Doanh thu từ phí dịch vụ", value="🔄 Đang chờ...")
+        with row2_col2: st.metric(label="Điểm hiệu suất chi nhánh (Branch Score)", value="🔄 Đang chờ...")
         
-        # Điền trạng thái chờ vào các ô hiển thị
-        row1_col1.text_input("Tổng lượng giao dịch mô phỏng", value=txt_volume, disabled=True)
-        row1_col2.text_input("Doanh thu kênh (Channel Revenue)", value=txt_revenue, disabled=True)
-        row2_col1.text_input("Doanh thu từ phí dịch vụ", value=txt_fee, disabled=True)
-        row2_col2.text_input("Điểm hiệu suất chi nhánh (Branch Score)", value=txt_score, disabled=True)
-        
-        # Khung thông báo trạng thái chờ dạng thông tin màu xám của Streamlit
+        # Khung thông báo trạng thái chờ dạng thông tin màu xanh lục nhạt
         st.info("🔄 Hệ thống đang ở trạng thái chờ kích hoạt tiến trình mô phỏng...")
 
     # Trường hợp 2: Người dùng nhấn nút CHẠY MÔ PHỎNG
     elif btn_run:
         # KIỂM TRA LỖI: Nếu chưa chọn chính sách phí dịch vụ
         if fee is None:
-            # Hiện icon cảnh báo màu vàng tại các ô kết quả đầu ra theo yêu cầu của bạn
-            row1_col1.text_input("Tổng lượng giao dịch mô phỏng", value=f"{ICON_WARN_YELLOW} Khuyết", disabled=True)
-            row1_col2.text_input("Doanh thu kênh (Channel Revenue)", value=f"{ICON_WARN_YELLOW} Khuyết", disabled=True)
-            row2_col1.text_input("Doanh thu từ phí dịch vụ", value=f"{ICON_WARN_YELLOW} Khuyết", disabled=True)
-            row2_col2.text_input("Điểm hiệu suất chi nhánh (Branch Score)", value=f"{ICON_WARN_YELLOW} Khuyết", disabled=True)
+            # Hiện trạng thái Khuyết to rõ tại các Metric kết quả đầu ra
+            with row1_col1: st.metric(label="Tổng lượng giao dịch mô phỏng", value="⚠️ Khuyết")
+            with row1_col2: st.metric(label="Doanh thu kênh (Channel Revenue)", value="⚠️ Khuyết")
+            with row2_col1: st.metric(label="Doanh thu từ phí dịch vụ", value="⚠️ Khuyết")
+            with row2_col2: st.metric(label="Điểm hiệu suất chi nhánh (Branch Score)", value="⚠️ Khuyết")
             
-            # Khung thông báo lỗi tổng thể bên dưới giữ màu đỏ uy tín bằng hàm st.error của Streamlit
+            # Khung thông báo lỗi tổng thể bên dưới giữ màu đỏ uy tín bằng hàm st.error
             st.error("**⚠️ THÔNG BÁO HỆ THỐNG:** Vui lòng xác định **Chính sách điều chỉnh phí dịch vụ** tại bảng cấu hình trước khi tiến hành thực hiện mô phỏng kịch bản.")
             
         else:
@@ -115,16 +110,20 @@ with col_right:
                     res = matched.iloc[0]
                     score_val = f"{res['FinalScore']:.3f}"
                 else:
-                    # Thuật toán tính khoảng cách khoảng cách để nội suy kịch bản gần nhất
+                    # Thuật toán tính khoảng cách để nội suy kịch bản gần nhất
                     df_wi['Distance'] = (df_wi['ATM'] - atm_val).abs() + (df_wi['Mobile'] - mob_val).abs() + (df_wi['Online'] - onl_val).abs() + (df_wi['Fee'] - fee_val).abs()
                     res = df_wi.sort_values(by='Distance').iloc[0]
                     score_val = f"{res['FinalScore']:.3f} (Nội suy)"
                 
-                # Đổ dữ liệu thật tìm được lên giao diện
-                row1_col1.text_input("Tổng lượng giao dịch mô phỏng", value=f"{res['TotalVolume']:.0f} GD", disabled=True)
-                row1_col2.text_input("Doanh thu kênh (Channel Revenue)", value=f"${res['TotalRevenue']:,.2f}", disabled=True)
-                row2_col1.text_input("Doanh thu từ phí dịch vụ", value=f"${res['TotalFeeRevenue']:,.2f}", disabled=True)
-                row2_col2.text_input("Điểm hiệu suất chi nhánh (Branch Score)", value=f"{res['BranchScore']:.3f}", disabled=True)
+                # Đổ dữ liệu thật tìm được lên giao diện Metric (Chữ to đùng, đậm nét màu đen chuẩn Dashboard)
+                with row1_col1: 
+                    st.metric(label="Tổng lượng giao dịch mô phỏng", value=f"{res['TotalVolume']:.0f} GD")
+                with row1_col2: 
+                    st.metric(label="Doanh thu kênh (Channel Revenue)", value=f"${res['TotalRevenue']:,.2f}")
+                with row2_col1: 
+                    st.metric(label="Doanh thu từ phí dịch vụ", value=f"${res['TotalFeeRevenue']:,.2f}")
+                with row2_col2: 
+                    st.metric(label="Điểm hiệu suất chi nhánh (Branch Score)", value=f"{res['BranchScore']:.3f}")
                 
                 # Khung thông báo kết quả thành công màu xanh lục của Streamlit
                 st.success(f"🏆 **CHỈ SỐ ĐÁNH GIÁ CHIẾN LƯỢC TỔNG HỢP (FINAL SCORE): {score_val}**")
