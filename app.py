@@ -120,4 +120,50 @@ with col_right:
         else:
             # KHỐI TRUY VẤN DỮ LIỆU TỪ FILE EXCEL HỆ THỐNG
             try:
-                df_wi = pd.read_excel
+                df_wi = pd.read_excel("Banking_Analytics_Result.xlsx", sheet_name="WhatIf")
+                df_wi['ATM'] = df_wi['ATM'].round(2)
+                df_wi['Mobile'] = df_wi['Mobile'].round(2)
+                df_wi['Online'] = df_wi['Online'].round(2)
+                df_wi['Fee'] = df_wi['Fee'].round(2)
+                
+                atm_val = round(atm, 2)
+                mob_val = round(mobile, 2)
+                onl_val = round(online, 2)
+                fee_val = round(float(fee), 2)
+                
+                # Tìm kiếm dòng dữ liệu kịch bản trùng khớp
+                matched = df_wi[
+                    (df_wi['ATM'] == atm_val) &
+                    (df_wi['Mobile'] == mob_val) &
+                    (df_wi['Online'] == onl_val) &
+                    (df_wi['Fee'] == fee_val)
+                ]
+                
+                if not matched.empty:
+                    res = matched.iloc[0]
+                    score_val = f"{res['FinalScore']:.3f}"
+                else:
+                    # Thuật toán tính toán khoảng cách hình học để nội suy kịch bản gần nhất
+                    df_wi['Distance'] = (df_wi['ATM'] - atm_val).abs() + (df_wi['Mobile'] - mob_val).abs() + (df_wi['Online'] - onl_val).abs() + (df_wi['Fee'] - fee_val).abs()
+                    res = df_wi.sort_values(by='Distance').iloc[0]
+                    score_val = f"{res['FinalScore']:.3f} (Nội suy)"
+                
+                # Hiển thị số liệu thật to, đậm, rõ ràng đặt gọn gàng trong các Card bo góc cao cấp
+                with row1_col1:
+                    with st.container(border=True):
+                        st.metric(label="Tổng lượng giao dịch mô phỏng", value=f"{res['TotalVolume']:.0f} GD")
+                with row1_col2:
+                    with st.container(border=True):
+                        st.metric(label="Doanh thu kênh (Channel Revenue)", value=f"${res['TotalRevenue']:,.2f}")
+                with row2_col1:
+                    with st.container(border=True):
+                        st.metric(label="Doanh thu từ phí dịch vụ", value=f"${res['TotalFeeRevenue']:,.2f}")
+                with row2_col2:
+                    with st.container(border=True):
+                        st.metric(label="Điểm hiệu suất chi nhánh (Branch Score)", value=f"{res['BranchScore']:.3f}")
+                
+                # Khung thông báo kết quả chiến lược tổng hợp đồng bộ màu xanh lục
+                st.success(f"🏆 **CHỈ SỐ ĐÁNH GIÁ CHIẾN LƯỢC TỔNG HỢP (FINAL SCORE): {score_val}**")
+                
+            except Exception as e:
+                st.error(f"❌ Lỗi hệ thống khi đọc dữ liệu tệp Excel: {str(e)}")
