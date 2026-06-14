@@ -60,13 +60,25 @@ with col_right:
     row1_col1, row1_col2 = st.columns(2)
     row2_col1, row2_col2 = st.columns(2)
     
+    # # Trường hợp 1: Người dùng nhấn nút XÓA BỘ LỌC hoặc chưa thực hiện hành động nào
+    # if btn_reset or (not btn_run):
+    #     # Điền trạng thái chờ vào các khối hiển thị Metric (Chữ to, rõ ràng)
+    #     with row1_col1: st.metric(label="Tổng lượng giao dịch mô phỏng", value="🔄 Đang chờ...")
+    #     with row1_col2: st.metric(label="Doanh thu kênh (Channel Revenue)", value="🔄 Đang chờ...")
+    #     with row2_col1: st.metric(label="Doanh thu từ phí dịch vụ", value="🔄 Đang chờ...")
+    #     with row2_col2: st.metric(label="Điểm hiệu suất chi nhánh (Branch Score)", value="🔄 Đang chờ...")
+
     # Trường hợp 1: Người dùng nhấn nút XÓA BỘ LỌC hoặc chưa thực hiện hành động nào
     if btn_reset or (not btn_run):
-        # Điền trạng thái chờ vào các khối hiển thị Metric (Chữ to, rõ ràng)
-        with row1_col1: st.metric(label="Tổng lượng giao dịch mô phỏng", value="🔄 Đang chờ...")
-        with row1_col2: st.metric(label="Doanh thu kênh (Channel Revenue)", value="🔄 Đang chờ...")
-        with row2_col1: st.metric(label="Doanh thu từ phí dịch vụ", value="🔄 Đang chờ...")
-        with row2_col2: st.metric(label="Điểm hiệu suất chi nhánh (Branch Score)", value="🔄 Đang chờ...")
+        st.info("🔄 **Hệ thống đang ở trạng thái chờ kích hoạt tiến trình mô phỏng...**")
+    
+        # Tạo chữ nhỏ tinh tế hiển thị trạng thái chờ
+        r1, r2 = st.columns(2)
+        r3, r4 = st.columns(2)
+        r1.caption("🔹 **Tổng lượng giao dịch mô phỏng:** *Đang chờ...*")
+        r2.caption("🔹 **Doanh thu kênh (Channel Revenue):** *Đang chờ...*")
+        r3.caption("🔹 **Doanh thu từ phí dịch vụ:** *Đang chờ...*")
+        r4.caption("🔹 **Điểm hiệu suất chi nhánh (Branch Score):** *Đang chờ...*")
         
         # Khung thông báo trạng thái chờ dạng thông tin màu xanh lục nhạt
         st.info("🔄 Hệ thống đang ở trạng thái chờ kích hoạt tiến trình mô phỏng...")
