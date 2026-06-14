@@ -22,7 +22,7 @@ st.markdown("*Nghiên cứu ứng dụng Prescriptive Analytics nhằm tối ưu
 st.markdown("---")
 
 # Chia giao diện làm 2 cột: Cột trái (Cấu hình), Cột phải (Kết quả)
-col_left, col_right = st.columns([1, 2], gap="large")
+col_left, col_right = st.columns([4, 5], gap="large")
 
 # =====================================================================
 # CỘT TRÁI: BẢNG ĐIỀU KHIỂN ĐẦU VÀO (WHAT-IF CONFIGURATION)
