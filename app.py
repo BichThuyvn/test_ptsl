@@ -16,6 +16,13 @@ st.set_page_config(
 ICON_WARN_YELLOW = "⚠️"  # Emoji hệ thống hiển thị màu vàng chuẩn trên trình duyệt
 ICON_WAIT = "🔄"         # Vòng xoay tiến trình trạng thái chờ
 
+# Khởi tạo giá trị mặc định trong st.session_state nếu chưa có
+if "atm_val" not in st.session_state: st.session_state.atm_val = 0.0
+if "mobile_val" not in st.session_state: st.session_state.mobile_val = 0.0
+if "online_val" not in st.session_state: st.session_state.online_val = 0.0
+if "fee_val" not in st.session_state: st.session_state.fee_val = None
+if "run_sim" not in st.session_state: st.session_state.run_sim = False
+
 # Thiết lập tiêu đề và mô tả hệ thống bằng Markdown
 st.markdown("# 📈 Hệ Thống Dự Báo & Mô Phỏng Kịch Bản Chiến Lược Ngân Hàng")
 st.markdown("*Nghiên cứu ứng dụng Prescriptive Analytics nhằm tối ưu hóa vận hành hệ thống số.*")
@@ -30,25 +37,34 @@ col_left, col_right = st.columns([4, 5], gap="large")
 with col_left:
     st.markdown("### 🎯 Cấu hình kịch bản (What-If)")
     
-    # Tạo các thanh trượt nhập tham số
-    atm = st.slider("Tăng trưởng quy mô kênh ATM", min_value=0.0, max_value=0.2, step=0.05, value=0.0)
-    mobile = st.slider("Đầu tư phát triển Mobile Banking", min_value=0.0, max_value=0.4, step=0.1, value=0.0)
-    online = st.slider("Khuyến khích Online Banking", min_value=0.0, max_value=0.25, step=0.05, value=0.0)
+    # Tạo các thanh trượt nhập tham số gắn liền với session_state
+    atm = st.slider("Tăng trưởng quy mô kênh ATM", min_value=0.0, max_value=0.2, step=0.05, key="atm_val")
+    mobile = st.slider("Đầu tư phát triển Mobile Banking", min_value=0.0, max_value=0.4, step=0.1, key="mobile_val")
+    online = st.slider("Khuyến khích Online Banking", min_value=0.0, max_value=0.25, step=0.05, key="online_val")
     
-    # Hộp chọn chính sách phí (Mặc định ban đầu chưa chọn để kích hoạt cảnh báo)
+    # Hộp chọn chính sách phí dịch vụ gắn liền với session_state
     fee_options = [None, -0.05, 0.0, 0.1]
     fee = st.selectbox(
         "Chính sách điều chỉnh phí dịch vụ", 
         options=fee_options, 
+        key="fee_val",
         format_func=lambda x: "Chưa xác định" if x is None else f"{x*100:+.1f}%"
     )
     
     # Tạo hàng chứa 2 nút bấm điều khiển
     col_btn1, col_btn2 = st.columns(2)
     with col_btn1:
-        btn_run = st.button("🚀 CHẠY MÔ PHỎNG", use_container_width=True, type="primary")
+        if st.button("🚀 CHẠY MÔ PHỎNG", use_container_width=True, type="primary"):
+            st.session_state.run_sim = True
     with col_btn2:
-        btn_reset = st.button("🗑️ XÓA BỘ LỌC", use_container_width=True)
+        if st.button("🗑️ XÓA BỘ LỌC", use_container_width=True):
+            # Khi bấm xóa bộ lọc, ép tất cả các biến trạng thái về mặc định ban đầu
+            st.session_state.atm_val = 0.0
+            st.session_state.mobile_val = 0.0
+            st.session_state.online_val = 0.0
+            st.session_state.fee_val = None
+            st.session_state.run_sim = False
+            st.rerun() # Tải lại trang ngay lập tức để đồng bộ giao diện
 
 # =====================================================================
 # CỘT PHẢI: XỬ LÝ LOGIC VÀ HIỂN THỊ KẾT QUẢ ĐẦU RA CAO CẤP (BOX CARDS)
@@ -61,7 +77,7 @@ with col_right:
     row2_col1, row2_col2 = st.columns(2)
     
     # TRƯỜNG HỢP 1: Trạng thái chờ kích hoạt (Tạo các Hộp Card trống bo góc có viền mờ cân đối)
-    if btn_reset or (not btn_run):
+    if not st.session_state.run_sim:
         with row1_col1:
             with st.container(border=True):
                 st.markdown("<p style='color: gray; font-size: 14px; margin-bottom: 5px;'>Tổng lượng giao dịch mô phỏng</p>", unsafe_allow_html=True)
@@ -85,7 +101,7 @@ with col_right:
         st.info("🔄 **Hệ thống đang ở trạng thái chờ kích hoạt tiến trình mô phỏng từ bảng điều khiển.**")
 
     # TRƯỜNG HỢP 2: Người dùng nhấn nút CHẠY MÔ PHỎNG
-    elif btn_run:
+    else:
         # Kiểm tra lỗi khuyết dữ liệu đầu vào
         if fee is None:
             with row1_col1:
