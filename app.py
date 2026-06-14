@@ -1,5 +1,5 @@
 # =====================================================================
-# MỨC 3 - ĐOẠF 4: WEB DASHBOARD - TRIỂN KHAI HOÀN TOÀN BẰNG STREAMLIT
+# MỨC 3 - ĐOẠN 4: WEB DASHBOARD - TRIỂN KHAI HOÀN TOÀN BẰNG STREAMLIT
 # =====================================================================
 import streamlit as st
 import pandas as pd
@@ -59,13 +59,13 @@ with col_left:
         st.session_state.fee_val = None
         st.session_state.run_sim = False
 
-    # Tạo hàng chứa 2 nút bấm điều khiển ứng dụng mã icon code tích hợp của Streamlit
+    # Tạo hàng chứa 2 nút bấm điều khiển ứng dụng mã Unicode phẳng an toàn
     col_btn1, col_btn2 = st.columns(2)
     with col_btn1:
-        if st.button("CHẠY MÔ PHỎNG", use_container_width=True, type="primary", icon="play_arrow"):
+        if st.button("▶ CHẠY MÔ PHỎNG", use_container_width=True, type="primary"):
             st.session_state.run_sim = True
     with col_btn2:
-        st.button("XÓA BỘ LỌC", use_container_width=True, icon="delete", on_click=reset_all_filters)
+        st.button("✖ XÓA BỘ LỌC", use_container_width=True, on_click=reset_all_filters)
 
 # =====================================================================
 # CỘT PHẢI: XỬ LÝ LOGIC VÀ HIỂN THỊ KẾT QUẢ ĐẦU RA CAO CẤP (BOX CARDS)
